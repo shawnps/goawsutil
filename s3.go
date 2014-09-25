@@ -8,31 +8,33 @@ import (
 )
 
 // S3Client is a deminius S3 Client that follows the REST API
-type S3Client struct {
+type AWSClient struct {
+	Service    string
 	HTTPClient *http.Client
 	Signer     *AWSV4Signer
 }
 
 // NewS3Client is a S3Client constructor
-func NewS3Client(cred *Credentials, client *http.Client) *S3Client {
+func NewAWSClient(service string, cred *Credentials, client *http.Client) *AWSClient {
 	if client == nil {
 		client = http.DefaultClient
 	}
 
-	return &S3Client{
+	return &AWSClient{
+		Service:    service,
 		HTTPClient: client,
 		Signer:     NewAWSV4Signer(cred),
 	}
 }
 
 // Get does a HTTP GET and signs the request
-func (c *S3Client) Get(urlStr string, xheaders map[string]string) (*http.Response, error) {
+func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Response, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
 
-	regionName := S3RegionFromURL(u)
+	regionName := RegionFromURL(u)
 	if regionName == "" {
 		return nil, fmt.Errorf("URL does not appear to an S3 endpoint: %s", urlStr)
 
@@ -55,18 +57,18 @@ func (c *S3Client) Get(urlStr string, xheaders map[string]string) (*http.Respons
 		Host:       u.Host,
 	}
 
-	c.Signer.Sign(&req, []byte{}, "", "s3", time.Now().UTC())
+	c.Signer.Sign(&req, []byte{}, regionName, c.Service, time.Now().UTC())
 
 	return c.HTTPClient.Do(&req)
 }
 
 // Put does an HTTP PUT request to an S3 Asset
-func (c *S3Client) Put(urlStr string, xheaders map[string]string, body []byte) (*http.Response, error) {
+func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) (*http.Response, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
-	regionName := S3RegionFromURL(u)
+	regionName := RegionFromURL(u)
 	if regionName == "" {
 		return nil, fmt.Errorf("URL does not appear to an S3 endpoint: %s", urlStr)
 	}
@@ -90,7 +92,7 @@ func (c *S3Client) Put(urlStr string, xheaders map[string]string, body []byte) (
 		Host:       u.Host,
 	}
 
-	c.Signer.Sign(&req, body, regionName, "s3", time.Now().UTC())
+	c.Signer.Sign(&req, body, regionName, c.Service, time.Now().UTC())
 
 	return c.HTTPClient.Do(&req)
 }
