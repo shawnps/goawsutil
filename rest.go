@@ -56,7 +56,7 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 		Header:     headers,
 	}
 
-	now = time.Now().UTC()
+	now := time.Now().UTC()
 	c.Signer.Prepare(&req, []byte{}, now)
 	c.Signer.Sign(&req, []byte{}, regionName, c.Service, now)
 
