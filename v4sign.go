@@ -58,6 +58,11 @@ func (a *AWSV4Signer) cannonicalizeQuery(u *url.URL) string {
 	return strings.Join(qsv, "&")
 }
 
+func (a *AWSV4Signer) Prepare(req *http.Request, payload []byte) {
+	rawHashedPayload := sha256.Sum256(payload)
+	req.Header.Set("x-amz-content-sha256", hex.EncodeToString(rawHashedPayload[:]))
+}
+
 // Sign does a single signature request
 func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string, serviceName string, now time.Time) {
 
@@ -72,9 +77,6 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	// quotation marks.
 
 	// Host is required but is a bit weird in go lang (3 places to specify it)
-	if req.Header == nil {
-		req.Header = make(http.Header)
-	}
 	host := req.Header.Get("Host")
 	if host == "" {
 		if req.Host != "" {
@@ -102,8 +104,12 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	}
 	sort.StringSlice(signedHeadersList).Sort()
 	signedHeaders := strings.Join(signedHeadersList, ";")
-	rawHashedPayload := sha256.Sum256(payload)
 
+	payloadHash := req.Header.Get("x-amz-content-sha256")
+	if payloadHash == "" {
+		rawHashedPayload := sha256.Sum256(payload)
+		payloadHash = hex.EncodeToString(rawHashedPayload[:])
+	}
 	buf := bytes.Buffer{}
 	buf.WriteString(req.Method)
 	buf.WriteByte('\n')
@@ -121,7 +127,7 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	buf.WriteByte('\n')
 	buf.WriteString(signedHeaders)
 	buf.WriteByte('\n')
-	buf.WriteString(hex.EncodeToString(rawHashedPayload[:]))
+	buf.WriteString(payloadHash)
 	a.CannonicalRequest = buf.Bytes()
 	cannonicalRequestHash := sha256.Sum256(a.CannonicalRequest)
 
