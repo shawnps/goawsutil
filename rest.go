@@ -101,5 +101,14 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 
 	c.Signer.Sign(&req, body, regionName, c.Service, time.Now().UTC())
 
-	return c.HTTPClient.Do(&req)
+	resp, err := c.HTTPClient.Do(&req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
+	}
+	return resp, nil
 }
