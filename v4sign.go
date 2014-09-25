@@ -72,6 +72,9 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	// quotation marks.
 
 	// Host is required but is a bit weird in go lang (3 places to specify it)
+	if req.Header == nil {
+		req.Header = make(http.Header)
+	}
 	host := req.Header.Get("Host")
 	if host == "" {
 		if req.Host != "" {
