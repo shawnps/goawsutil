@@ -95,12 +95,13 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 	}
 
 	req := http.Request{
-		Method:     "PUT",
-		URL:        u,
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-		Header:     headers,
-		Body:       ioutil.NopCloser(bytes.NewReader(body)),
+		Method:        "PUT",
+		URL:           u,
+		ProtoMajor:    1,
+		ProtoMinor:    1,
+		ContentLength: len(body),
+		Header:        headers,
+		Body:          ioutil.NopCloser(bytes.NewReader(body)),
 	}
 	now := time.Now().UTC()
 	c.Signer.Prepare(&req, body, now)
