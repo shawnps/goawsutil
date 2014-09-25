@@ -112,6 +112,7 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 		rawHashedPayload := sha256.Sum256(payload)
 		payloadHash = hex.EncodeToString(rawHashedPayload[:])
 	}
+
 	buf := bytes.Buffer{}
 	buf.WriteString(req.Method)
 	buf.WriteByte('\n')

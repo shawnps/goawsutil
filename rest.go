@@ -1,6 +1,7 @@
 package goawsutil
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -99,6 +100,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 		Header:     headers,
+		Body:       ioutil.NopCloser(bytes.NewReader(body)),
 	}
 	now := time.Now().UTC()
 	c.Signer.Prepare(&req, body, now)
