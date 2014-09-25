@@ -55,7 +55,7 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 		Body:       nil,
 		Header:     headers,
 	}
-
+	c.Signer.Prepare(&req, []byte{})
 	c.Signer.Sign(&req, []byte{}, regionName, c.Service, time.Now().UTC())
 
 	resp, err := c.HTTPClient.Do(&req)
@@ -99,6 +99,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		Header:     headers,
 	}
 
+	c.Signer.Prepare(&req, body)
 	c.Signer.Sign(&req, body, regionName, c.Service, time.Now().UTC())
 
 	resp, err := c.HTTPClient.Do(&req)
