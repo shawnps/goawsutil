@@ -63,7 +63,7 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 		return nil, err
 	}
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
-		data, err := ioutil.ReadAll(resp.Body)
+		data, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
 	}
@@ -106,7 +106,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		data, err := ioutil.ReadAll(resp.Body)
+		data, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
 	}
