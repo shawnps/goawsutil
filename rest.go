@@ -2,6 +2,7 @@ package goawsutil
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
@@ -49,17 +50,24 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 	req := http.Request{
 		Method:     "GET",
 		URL:        u,
-		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 		Body:       nil,
 		Header:     headers,
-		Host:       u.Host,
 	}
 
 	c.Signer.Sign(&req, []byte{}, regionName, c.Service, time.Now().UTC())
 
-	return c.HTTPClient.Do(&req)
+	resp, err := c.HTTPClient.Do(&req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 && resp.StatusCode != 204 {
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
+	}
+	return resp, nil
 }
 
 // Put does an HTTP PUT request to an S3 Asset
@@ -86,11 +94,9 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 	req := http.Request{
 		Method:     "PUT",
 		URL:        u,
-		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 		Header:     headers,
-		Host:       u.Host,
 	}
 
 	c.Signer.Sign(&req, body, regionName, c.Service, time.Now().UTC())
