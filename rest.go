@@ -99,7 +99,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		URL:           u,
 		ProtoMajor:    1,
 		ProtoMinor:    1,
-		ContentLength: len(body),
+		ContentLength: int64(len(body)),
 		Header:        headers,
 		Body:          ioutil.NopCloser(bytes.NewReader(body)),
 	}
