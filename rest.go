@@ -85,7 +85,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 	}
 
 	headers := make(http.Header)
-	// Add our stuff
+	headers.Set("Content-Length", fmt.Sprintf("%d", len(body)))
 
 	// override
 	if xheaders != nil {
