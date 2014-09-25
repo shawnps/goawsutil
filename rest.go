@@ -89,6 +89,7 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
+		Header:     headers,
 		Host:       u.Host,
 	}
 
