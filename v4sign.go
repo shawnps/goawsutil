@@ -58,9 +58,11 @@ func (a *AWSV4Signer) cannonicalizeQuery(u *url.URL) string {
 	return strings.Join(qsv, "&")
 }
 
-func (a *AWSV4Signer) Prepare(req *http.Request, payload []byte) {
+func (a *AWSV4Signer) Prepare(req *http.Request, payload []byte, now time.Time) {
 	rawHashedPayload := sha256.Sum256(payload)
 	req.Header.Set("x-amz-content-sha256", hex.EncodeToString(rawHashedPayload[:]))
+
+	req.Header.Set("x-amz-date", now.UTC().Format("20060102T150405Z"))
 }
 
 // Sign does a single signature request
