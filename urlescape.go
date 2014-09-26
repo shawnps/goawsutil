@@ -5,10 +5,11 @@ package goawsutil
 // this was horked from google go lang source code
 // BOO on goamz
 
+// http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 // amazonShouldEscape returns true if byte should be escaped
 func amazonShouldEscape(c byte) bool {
 	return !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
-		(c >= '0' && c <= '9') || c == '_' || c == '-' || c == '~' || c == '.' || c == '/' || c == ':')
+		(c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~')
 }
 
 // URLEscape does url escape in the cannonical way for Amazon
