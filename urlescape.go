@@ -7,17 +7,20 @@ package goawsutil
 
 // http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 // amazonShouldEscape returns true if byte should be escaped
-func amazonShouldEscape(c byte) bool {
+func amazonShouldEscape(c byte, escapeSlash bool) bool {
+	if c == '/' {
+		return escapeSlash
+	}
 	return !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
 		(c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~')
 }
 
 // URLEscape does url escape in the cannonical way for Amazon
-func URLEscape(s string) string {
+func URLEscape(s string, escapeSlash bool) string {
 	hexCount := 0
 
 	for i := 0; i < len(s); i++ {
-		if amazonShouldEscape(s[i]) {
+		if amazonShouldEscape(s[i], escapeSlash) {
 			hexCount++
 		}
 	}
@@ -29,7 +32,7 @@ func URLEscape(s string) string {
 	t := make([]byte, len(s)+2*hexCount)
 	j := 0
 	for i := 0; i < len(s); i++ {
-		if c := s[i]; amazonShouldEscape(c) {
+		if c := s[i]; amazonShouldEscape(c, escapeSlash) {
 			t[j] = '%'
 			t[j+1] = "0123456789ABCDEF"[c>>4]
 			t[j+2] = "0123456789ABCDEF"[c&15]

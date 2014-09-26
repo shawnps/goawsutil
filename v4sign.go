@@ -36,7 +36,9 @@ func (a *AWSV4Signer) cannonicalizePath(u *url.URL) string {
 
 	cleanpath := u.Path
 	cleanpath = path.Clean(cleanpath)
-	cleanpath = URLEscape(cleanpath)
+
+	// do not escape '/'
+	cleanpath = URLEscape(cleanpath, false)
 
 	// add back ending "/" if it got nuked
 	if cleanpath != "/" && strings.HasSuffix(u.Path, "/") && !strings.HasSuffix(cleanpath, "/") {
@@ -51,7 +53,8 @@ func (a *AWSV4Signer) cannonicalizeQuery(u *url.URL) string {
 	qsv := make([]string, 0, len(u.Query()))
 	for k, vlist := range u.Query() {
 		for _, v := range vlist {
-			qsv = append(qsv, url.QueryEscape(k)+"="+url.QueryEscape(v))
+			// yes do escape '/'
+			qsv = append(qsv, URLEscape(k, true)+"="+URLEscape(v, true))
 		}
 	}
 	sort.Strings(qsv)
