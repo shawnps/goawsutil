@@ -15,7 +15,7 @@ func amazonShouldEscape(c byte, escapeSlash bool) bool {
 		(c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~')
 }
 
-// URLEscape does url escape in the cannonical way for Amazon
+// URLEscape does url escape in the canonical way for Amazon
 func URLEscape(s string, escapeSlash bool) string {
 	hexCount := 0
 

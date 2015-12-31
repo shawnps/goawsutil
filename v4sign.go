@@ -32,7 +32,7 @@ func NewAWSV4Signer(awscred *Credentials) *AWSV4Signer {
 		cred: awscred,
 	}
 }
-func (a *AWSV4Signer) cannonicalizePath(u *url.URL) string {
+func (a *AWSV4Signer) canonicalizePath(u *url.URL) string {
 
 	cleanpath := u.Path
 	cleanpath = path.Clean(cleanpath)
@@ -48,7 +48,7 @@ func (a *AWSV4Signer) cannonicalizePath(u *url.URL) string {
 	return cleanpath
 }
 
-func (a *AWSV4Signer) cannonicalizeQuery(u *url.URL) string {
+func (a *AWSV4Signer) canonicalizeQuery(u *url.URL) string {
 	// assume duplicates in query string are rare
 	qsv := make([]string, 0, len(u.Query()))
 	for k, vlist := range u.Query() {
@@ -71,8 +71,8 @@ func (a *AWSV4Signer) Prepare(req *http.Request, payload []byte, now time.Time) 
 // Sign does a single signature request
 func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string, serviceName string, now time.Time) {
 
-	cannonicalQuery := a.cannonicalizeQuery(req.URL)
-	cannonicalPath := a.cannonicalizePath(req.URL)
+	canonicalQuery := a.canonicalizeQuery(req.URL)
+	canonicalPath := a.canonicalizePath(req.URL)
 
 	// To create the canonical headers list, convert all header names to
 	// lowercase and trim excess white space characters out of the header
@@ -92,19 +92,19 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 		req.Header.Set("Host", host)
 	}
 
-	cannonicalHeaderMap := make(map[string]string)
+	canonicalHeaderMap := make(map[string]string)
 	for k, vlist := range req.Header {
 		cvlist := make([]string, len(vlist))
 		for pos, v := range vlist {
-			// TODO cannonicalize V
+			// TODO canonicalize V
 			cvlist[pos] = strings.TrimSpace(v)
 		}
 		sort.Strings(cvlist)
-		cannonicalHeaderMap[strings.ToLower(k)] = strings.Join(cvlist, ",")
+		canonicalHeaderMap[strings.ToLower(k)] = strings.Join(cvlist, ",")
 	}
 	// now make signedHeadersList
-	signedHeadersList := make([]string, 0, len(cannonicalHeaderMap))
-	for k := range cannonicalHeaderMap {
+	signedHeadersList := make([]string, 0, len(canonicalHeaderMap))
+	for k := range canonicalHeaderMap {
 		signedHeadersList = append(signedHeadersList, k)
 	}
 	sort.StringSlice(signedHeadersList).Sort()
@@ -119,15 +119,15 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	buf := bytes.Buffer{}
 	buf.WriteString(req.Method)
 	buf.WriteByte('\n')
-	buf.WriteString(cannonicalPath)
+	buf.WriteString(canonicalPath)
 	buf.WriteByte('\n')
-	buf.WriteString(cannonicalQuery)
+	buf.WriteString(canonicalQuery)
 	buf.WriteByte('\n')
 
 	for _, k := range signedHeadersList {
 		buf.WriteString(k)
 		buf.WriteByte(':')
-		buf.WriteString(cannonicalHeaderMap[k])
+		buf.WriteString(canonicalHeaderMap[k])
 		buf.WriteByte('\n')
 	}
 	buf.WriteByte('\n')
@@ -135,7 +135,7 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	buf.WriteByte('\n')
 	buf.WriteString(payloadHash)
 	a.CannonicalRequest = buf.Bytes()
-	cannonicalRequestHash := sha256.Sum256(a.CannonicalRequest)
+	canonicalRequestHash := sha256.Sum256(a.CannonicalRequest)
 
 	// TASK 2
 	// Create a String to Sign for Signature Version 4
@@ -149,7 +149,7 @@ func (a *AWSV4Signer) Sign(req *http.Request, payload []byte, regionName string,
 	buf2.WriteByte('\n')
 	buf2.WriteString(credentialScope)
 	buf2.WriteByte('\n')
-	buf2.WriteString(hex.EncodeToString(cannonicalRequestHash[:]))
+	buf2.WriteString(hex.EncodeToString(canonicalRequestHash[:]))
 	// no ending newline
 	a.StringToSign = buf2.Bytes()
 

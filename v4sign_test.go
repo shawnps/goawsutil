@@ -59,7 +59,7 @@ func reqfileToHTTP(fname string) (http.Request, []byte) {
 	// From this build up URL
 	host := headers.Get("Host")
 	if host == "" {
-		panic("didnt find host")
+		panic("didn't find host")
 	}
 
 	requrl, err := url.Parse(fmt.Sprintf("https://%s/%s", host, introparts[1]))
