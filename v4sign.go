@@ -26,7 +26,7 @@ type AWSV4Signer struct {
 	StringToSign      []byte
 }
 
-// NewAWSV4Signer is a contructor.
+// NewAWSV4Signer is a constructor.
 func NewAWSV4Signer(awscred *Credentials) *AWSV4Signer {
 	return &AWSV4Signer{
 		cred: awscred,
