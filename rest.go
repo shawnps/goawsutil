@@ -67,7 +67,10 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
-		data, _ := ioutil.ReadAll(resp.Body)
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse HTTP repsonse error: %s", err)
+		}
 		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
 	}
 	return resp, nil
@@ -113,7 +116,10 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		data, _ := ioutil.ReadAll(resp.Body)
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse HTTP repsonse error: %s", err)
+		}
 		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
 	}
 	return resp, nil
