@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// S3RegionEndpoints is map of RegionName to RegionEndpoint
+// RegionEndpoints is map of RegionName to RegionEndpoint
 var RegionEndpoints = map[string]string{
 	"us-gov-west-1":  "fips-us-gov-west-1.amazonaws.com",
 	"us-east-1":      "s3.amazonaws.com",
@@ -19,7 +19,7 @@ var RegionEndpoints = map[string]string{
 	"cn-north-1":     "cn-north-1.amazonaws.com.cn",
 }
 
-// S3RegionFromURL determines the region from a S3 URL or empty string
+// RegionFromURL determines the region from a S3 URL or empty string
 //  if it does not appear to be a S3 endpoint
 func RegionFromURL(u *url.URL) string {
 	host := u.Host
