@@ -66,7 +66,7 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 && resp.StatusCode != 204 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		data, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse HTTP repsonse error: %s", err)
