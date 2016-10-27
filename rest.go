@@ -2,6 +2,7 @@ package goawsutil
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +15,14 @@ type AWSClient struct {
 	Service    string
 	HTTPClient *http.Client
 	Signer     *AWSV4Signer
+}
+
+// ErrorResponse contains error information from an error response
+type ErrorResponse struct {
+	Code      string
+	Message   string
+	Resource  string
+	RequestID string `xml:"RequestId"`
 }
 
 // NewAWSClient is a AWSClient constructor
@@ -71,7 +80,12 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 		if err != nil {
 			return nil, fmt.Errorf("could not parse HTTP repsonse error: %s", err)
 		}
-		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
+		var errResp ErrorResponse
+		err = xml.Unmarshal(data, &errResp)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshal HTTP repsonse error: %s", err)
+		}
+		return nil, fmt.Errorf("HTTP Response Error: Code: %s, Message: %s", errResp.Code, errResp.Message)
 	}
 	return resp, nil
 }
@@ -120,7 +134,12 @@ func (c *AWSClient) Put(urlStr string, xheaders map[string]string, body []byte) 
 		if err != nil {
 			return nil, fmt.Errorf("could not parse HTTP repsonse error: %s", err)
 		}
-		return nil, fmt.Errorf("HTTP Response Error: %s", string(data))
+		var errResp ErrorResponse
+		err = xml.Unmarshal(data, &errResp)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshal HTTP repsonse error: %s", err)
+		}
+		return nil, fmt.Errorf("HTTP Response Error: Code: %s, Message: %s", errResp.Code, errResp.Message)
 	}
 	return resp, nil
 }
