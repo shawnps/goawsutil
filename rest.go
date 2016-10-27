@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-// AWSClient is a deminius S3 Client that follows the REST API
+// AWSClient is a deminius AWS Client that follows the REST API
 type AWSClient struct {
 	Service    string
 	HTTPClient *http.Client
 	Signer     *AWSV4Signer
 }
 
-// NewAWSClient is a S3Client constructor
+// NewAWSClient is a AWSClient constructor
 func NewAWSClient(service string, cred *Credentials, client *http.Client) *AWSClient {
 	if client == nil {
 		client = http.DefaultClient
