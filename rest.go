@@ -38,7 +38,7 @@ func (c *AWSClient) Get(urlStr string, xheaders map[string]string) (*http.Respon
 
 	regionName := RegionFromURL(u)
 	if regionName == "" {
-		return nil, fmt.Errorf("URL does not appear to an S3 endpoint: %s", urlStr)
+		return nil, fmt.Errorf("URL does not appear to be an S3 endpoint: %s", urlStr)
 
 	}
 
